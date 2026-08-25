@@ -24,13 +24,14 @@ class NativeWindow:
         self.corriendo = True
         self.ultimo_clic = None 
         
-        # --- VENTANA CON TAMAÑO FIJO DE TELÉFONO ESCALADO ---
-        # Sin ALLOW_HIGHDPI aquí para controlar manualmente el tamaño
+        # --- VENTANA CON TAMAÑO FIJO DE TELÉFONO (360x640) ---
+        # Usamos resolución base de Android para que quepa perfectamente en cualquier monitor
+        # Sin ALLOW_HIGHDPI para control manual del tamaño
         flags = sdl2.SDL_WINDOW_SHOWN | sdl2.SDL_WINDOW_RESIZABLE
         
         self.window = sdl2.ext.Window(
             titulo, 
-            size=(self.ancho, self.alto),  # Tamaño físico escalado (ej: 720x1280)
+            size=(self.ancho, self.alto),  # Tamaño físico: 360x640
             flags=flags
         )
         self.window.show()
@@ -51,18 +52,7 @@ class NativeWindow:
             flags=renderer_flags
         )
         
-        # Configurar escala de renderizado: dibujar en resolución lógica pero mostrar escalado
-        # Esto mantiene la nitidez sin sobrecargar la GPU
-        sdl2.SDL_RenderSetScale(self.renderer.renderer, self.escala_ventana, self.escala_ventana)
-        
-        # Establecer tamaño lógico del renderer (coordenadas que usará la app)
-        sdl2.SDL_RenderSetLogicalSize(
-            self.renderer.renderer,
-            self.ancho_logico,
-            self.alto_logico
-        )
-        
-        # Calidad de escalado suave (bilinear filtering)
+        # Calidad de escalado suave (bilinear filtering) para evitar pixelación
         sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_SCALE_QUALITY, b"1")
         
         # Obtenemos el ID de la ventana
