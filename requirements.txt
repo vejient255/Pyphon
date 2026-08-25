@@ -1,0 +1,12 @@
+# PyPhonOS - Dependencias principales
+# Framework UI para Python con renderizado SDL2
+
+# Renderizado gráfico y ventana nativa
+pysdl2>=0.9.14
+pysdl2-dll>=2.30.0
+
+# Fuentes TrueType para renderizado de texto
+# Nota: pysdl2-ttf es parte de pysdl2-dll en versiones recientes
+
+# Utilidades opcionales para desarrollo
+# typing-extensions>=4.0.0  # Para características avanzadas de tipado en Python <3.10
