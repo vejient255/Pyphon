@@ -1,6 +1,8 @@
 # widgets/base.py
+import sdl2
 from renderer.colors import Palette, Color
 from events.handler import EventHandler
+from renderer.lighting import LightingEngine
 
 class Widget:
     def __init__(self, x=0, y=0, width=100, height=100, id=None, children=None, background_color=Palette.SURFACE, on_click=None, **kwargs):
@@ -24,6 +26,7 @@ class Widget:
         self.visible = True
         self.enabled = True
         self.is_focused = False
+        self.is_pressed = False  # Nuevo estado para botones
         self.opacity = 1.0  # 0.0 = invisible, 1.0 = opaco
         
         # Estilo Base Moderno
@@ -35,6 +38,11 @@ class Widget:
         self.shadow_offset = (0, 0)
         self.shadow_blur = 0
         self.haptic_enabled = True  # Feedback táctil visual
+        
+        # Propiedades Neumórficas
+        self.neumorphic = kwargs.get("neumorphic", False)
+        self.elevation = kwargs.get("elevation", 1.0)  # Altura del relieve (0.5 a 3.0)
+        self.light_angle = kwargs.get("light_angle", 315)  # Ángulo de luz
         
         # Jerarquía
         self.parent = None
@@ -112,32 +120,43 @@ class Widget:
 
         abs_x, abs_y = self.get_absolute_position()
 
-        # 1. Dibujar Sombra (si aplica)
-        if self.shadow_blur > 0:
-            canvas.draw_shadow(
-                abs_x + self.shadow_offset[0], 
-                abs_y + self.shadow_offset[1], 
-                self.width, self.height, 
-                radius=self.shadow_blur, 
-                intensity=self.shadow_color.a
+        # 1. Dibujar con efecto Neumórfico si está activado
+        if self.neumorphic:
+            canvas.draw_neumorphic_surface(
+                abs_x, abs_y, self.width, self.height,
+                self.border_radius,
+                self.background_color,
+                elevation=self.elevation,
+                pressed=self.is_pressed,
+                light_angle=self.light_angle
             )
+        else:
+            # 1. Dibujar Sombra tradicional (si aplica)
+            if self.shadow_blur > 0:
+                canvas.draw_shadow(
+                    abs_x + self.shadow_offset[0], 
+                    abs_y + self.shadow_offset[1], 
+                    self.width, self.height, 
+                    radius=self.shadow_blur, 
+                    intensity=self.shadow_color.a
+                )
 
-        # 2. Dibujar Fondo (soporta redondeado)
-        if self.background_color and self.background_color.a > 0:
-            if self.border_radius > 0:
+            # 2. Dibujar Fondo (soporta redondeado)
+            if self.background_color and self.background_color.a > 0:
+                if self.border_radius > 0:
+                    canvas.draw_rounded_rect(
+                        abs_x, abs_y, self.width, self.height, 
+                        self.border_radius, self.background_color, alpha=self.background_color.a
+                    )
+                else:
+                    canvas.draw_rect(abs_x, abs_y, self.width, self.height, self.background_color, alpha=self.background_color.a)
+
+            # 3. Dibujar Borde (si aplica)
+            if self.border_width > 0:
                 canvas.draw_rounded_rect(
                     abs_x, abs_y, self.width, self.height, 
-                    self.border_radius, self.background_color, alpha=self.background_color.a
+                    self.border_radius, self.border_color, alpha=60 # Borde muy tenue
                 )
-            else:
-                canvas.draw_rect(abs_x, abs_y, self.width, self.height, self.background_color, alpha=self.background_color.a)
-
-        # 3. Dibujar Borde (si aplica)
-        if self.border_width > 0:
-            canvas.draw_rounded_rect(
-                abs_x, abs_y, self.width, self.height, 
-                self.border_radius, self.border_color, alpha=60 # Borde muy tenue
-            )
 
         # 4. Dibujar hijos encima
         for child in self.children:
@@ -157,6 +176,12 @@ class Widget:
         # Manejo de clic básico si el evento tiene x, y
         if hasattr(event, 'x') and hasattr(event, 'y'):
             if self.is_point_inside(event.x, event.y):
+                # Actualizar estado is_pressed para widgets neumórficos
+                if event.type == sdl2.SDL_MOUSEBUTTONDOWN:
+                    self.is_pressed = True
+                elif event.type == sdl2.SDL_MOUSEBUTTONUP:
+                    self.is_pressed = False
+                
                 self.events.on_click.emit()
                 return True
         return False
