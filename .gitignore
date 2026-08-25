@@ -1,54 +1,36 @@
 ```python
-# Python
-__pycache__/
+# Compiled Python files
 *.pyc
-*.pyo
-*.pyd
-.Python
-env/
+__pycache__/
+
+# Virtual environments
 venv/
 .venv/
-.ENV
-.ENV.local
 .env
 .env.local
-.env.*
-.venv.bak/
-.venv/
-.python-version
-.pytest_cache/
-.mypy_cache/
-.coverage
-coverage/
-htmlcov/
+*.env.*
 
-# Build artifacts
-build/
-dist/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# IDE and editor
+# IDE and editor files
 .vscode/
 .idea/
 *.swp
 *.swo
 *.tmp
 
-# OS
-.DS_Store
-Thumbs.db
-
 # Logs
 *.log
 
-# Compressed files
-*.zip
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.gz
-*.rar
-*.7z
+# Build artifacts
+build/
+dist/
+target/
+
+# Coverage reports
+.coverage
+coverage/
+htmlcov/
+
+# Python cache
+.mypy_cache/
+.pytest_cache/
 ```

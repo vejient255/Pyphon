@@ -15,17 +15,15 @@ class MobileApp:
     def __init__(self, titulo="PyPhonOS", ancho=360, alto=640):
         """
         Inicializa el motor principal de PyPhonOS.
-        Soporte HiDPI: Renderiza a resolución nativa del monitor para máxima nitidez.
+        Ventana de tamaño fijo 360x640 (resolución base de Android) para desarrollo en PC.
         """
         MobileApp.INSTANCE = self
         
-        # 0. Configuración de Calidad y DPI ANTES de crear ventana (CRÍTICO)
-        # Habilita conciencia de DPI por monitor para Windows/macOS
-        sdl2.SDL_SetHint(sdl2.SDL_HINT_WINDOWS_DPI_AWARENESS, b"permonitorv2")
+        # 0. Configuración de Calidad ANTES de crear ventana
         # Calidad de escalado: "1" = filtrado bilinear (buen equilibrio calidad/rendimiento)
         sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_SCALE_QUALITY, b"1")
         
-        # 1. Crear ventana con tamaño fijo de teléfono (escalado 2x en window.py)
+        # 1. Crear ventana con tamaño fijo de teléfono (360x640)
         self.window = NativeWindow(ancho, alto, titulo)
         self.canvas = Canvas(self.window)
         
