@@ -6,9 +6,9 @@ import ctypes
 class NativeWindow:
     def __init__(self, ancho, alto, titulo):
         """
-        Inicializa una ventana con tamaño fijo de teléfono pero renderizado HiDPI.
-        La ventana se muestra escalada (ej: 360x640 → 720x1280 en pantalla) pero
-        mantiene coordenadas lógicas de teléfono para compatibilidad.
+        Inicializa una ventana con tamaño fijo de teléfono (360x640).
+        La ventana mantiene exactamente este tamaño físico en pantalla,
+        sin escalado, para simular un dispositivo móvil real.
         """
         # Inicializar los subsistemas de SDL2
         sdl2.ext.init()
@@ -16,18 +16,17 @@ class NativeWindow:
         self.ancho_logico = ancho  # Coordenadas lógicas (360x640)
         self.alto_logico = alto
         
-        # Factor de escala para ventana física (2x para que se vea bien en monitores modernos)
-        self.escala_ventana = 2.0
-        self.ancho = int(ancho * self.escala_ventana)
-        self.alto = int(alto * self.escala_ventana)
+        # Tamaño físico exacto de la ventana (sin escalado)
+        self.ancho = ancho
+        self.alto = alto
         
         self.corriendo = True
         self.ultimo_clic = None 
         
         # --- VENTANA CON TAMAÑO FIJO DE TELÉFONO (360x640) ---
         # Usamos resolución base de Android para que quepa perfectamente en cualquier monitor
-        # Sin ALLOW_HIGHDPI para control manual del tamaño
-        flags = sdl2.SDL_WINDOW_SHOWN | sdl2.SDL_WINDOW_RESIZABLE
+        # Sin ALLOW_HIGHDPI y sin escalado para control total del tamaño
+        flags = sdl2.SDL_WINDOW_SHOWN  # Sin RESIZABLE para ventana fija
         
         self.window = sdl2.ext.Window(
             titulo, 
