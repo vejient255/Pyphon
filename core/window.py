@@ -8,6 +8,7 @@ class NativeWindow:
         """
         Inicializa una ventana con escalado de alta densidad forzado.
         Optimizado para eliminar el aliasing (píxeles serruchados).
+        IMPORTANTE: Las hints de calidad ya se establecen en app.py ANTES de crear esta ventana.
         """
         # Inicializar los subsistemas de SDL2
         sdl2.ext.init()
@@ -17,16 +18,8 @@ class NativeWindow:
         self.corriendo = True
         self.ultimo_clic = None 
         
-        # --- MEJORA DE ALTA RESOLUCIÓN FORZADA ---
-        # Forzamos que la aplicación sea consciente del DPI antes de crear la ventana
-        # Esto es crítico en Windows y Android para evitar que el OS estire los píxeles
-        # Hint de calidad de renderizado: 
-        # "0" = Nearest (Pixelado/Mala calidad)
-        # "1" = Linear (Borrosito)
-        # "2" = Best (Nitidez máxima, usa la GPU para suavizar)
-        sdl2.SDL_SetHint(sdl2.SDL_HINT_VIDEO_HIGHDPI_DISABLED, b"0")
-        sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_SCALE_QUALITY, b"2")
-        
+        # --- VENTANA CON SOPORTE HiDPI ---
+        # ALLOW_HIGHDPI es CRÍTICO: permite que la ventana use resolución nativa del monitor
         flags = (
             sdl2.SDL_WINDOW_SHOWN | 
             sdl2.SDL_WINDOW_RESIZABLE | 
@@ -40,11 +33,7 @@ class NativeWindow:
         )
         self.window.show()
         
-        # --- RENDERER CON SUAVIZADO DE ALTA CALIDAD ---
-        # Hint "best" activa el filtrado anisotrópico si la GPU lo soporta
-        # Si no, bajará automáticamente a lineal, pero siempre buscando la mayor nitidez.
-        sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_SCALE_QUALITY, b"best")
-        
+        # --- RENDERER CON ACELERACIÓN GPU ---
         renderer_flags = (
             sdl2.SDL_RENDERER_ACCELERATED | 
             sdl2.SDL_RENDERER_PRESENTVSYNC |
@@ -56,13 +45,8 @@ class NativeWindow:
             flags=renderer_flags
         )
         
-        # Sincronización de coordenadas lógicas
-        # Esto permite que escribas en 360x640 pero la GPU renderice a la resolución real
-        sdl2.SDL_RenderSetLogicalSize(
-            self.renderer.renderer, 
-            self.ancho, 
-            self.alto
-        )
+        # NOTA: El tamaño lógico se establece en app.py después de detectar DPI
+        # No lo sobrescribimos aquí para evitar conflictos
         
         # Obtenemos el ID de la ventana
         self.window_id = sdl2.SDL_GetWindowID(self.window.window)
