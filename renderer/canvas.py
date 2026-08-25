@@ -7,6 +7,8 @@ import sys
 import math
 import ctypes
 
+from renderer.lighting import LightingEngine
+
 class Canvas:
     def __init__(self, window_instance):
         """
@@ -360,6 +362,67 @@ class Canvas:
     def _create_shadow_texture(self, r, intensity):
         """Genera un patrón de sombra radial (un cuarto) para la caché."""
         return self._create_corner_texture(r, 0x000000, intensity)
+    
+    def draw_neumorphic_surface(self, x, y, w, h, border_radius, base_color, 
+                                 elevation=1.0, pressed=False, light_angle=None):
+        """
+        Dibuja una superficie con efecto neumórfico completo usando el motor de iluminación.
+        Maneja automáticamente las dos sombras (clara y oscura) para crear volumen real.
+        
+        Args:
+            x, y: Posición del widget
+            w, h: Dimensiones
+            border_radius: Radio de bordes redondeados
+            base_color: Color base (hex o Color)
+            elevation: Altura simulada (0.5 a 3.0) - mayor = más relieve
+            pressed: Si True, invierte sombras para efecto hundido
+            light_angle: Ángulo de luz personalizado (default: 315°)
+        """
+        # Calcular sombras usando el motor de iluminación
+        if pressed:
+            light_shadow, dark_shadow, offset_x, offset_y = LightingEngine.calculate_pressed_shadows(
+                base_color, depth=elevation
+            )
+        else:
+            light_shadow, dark_shadow, offset_x, offset_y = LightingEngine.calculate_shadows(
+                base_color, elevation=elevation, light_angle=light_angle
+            )
+        
+        abs_x, abs_y = int(x), int(y)
+        
+        # 1. Dibujar sombra oscura (la que está más lejos del fondo)
+        shadow_offset = 3 + int(elevation * 2)
+        if border_radius > 0:
+            self.draw_rounded_rect(
+                abs_x + shadow_offset, abs_y + shadow_offset, w, h,
+                border_radius, dark_shadow, alpha=min(80, int(40 * elevation))
+            )
+        else:
+            self.draw_rect(
+                abs_x + shadow_offset, abs_y + shadow_offset, w, h,
+                dark_shadow, alpha=min(80, int(40 * elevation))
+            )
+        
+        # 2. Dibujar sombra clara (highlight)
+        highlight_offset = max(0, shadow_offset - 2)
+        if border_radius > 0:
+            self.draw_rounded_rect(
+                abs_x - highlight_offset, abs_y - highlight_offset, w, h,
+                border_radius, light_shadow, alpha=min(60, int(30 * elevation))
+            )
+        else:
+            self.draw_rect(
+                abs_x - highlight_offset, abs_y - highlight_offset, w, h,
+                light_shadow, alpha=min(60, int(30 * elevation))
+            )
+        
+        # 3. Dibujar superficie base (encima de las sombras)
+        if border_radius > 0:
+            self.draw_rounded_rect(abs_x, abs_y, w, h, border_radius, base_color)
+        else:
+            self.draw_rect(abs_x, abs_y, w, h, base_color)
+        
+        return (light_shadow, dark_shadow)
 
     def _hex_to_rgb(self, color_hex):
         """Convierte enteros o hexadecimales a formato RGB compatible con SDL2."""
