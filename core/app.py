@@ -22,46 +22,12 @@ class MobileApp:
         # 0. Configuración de Calidad y DPI ANTES de crear ventana (CRÍTICO)
         # Habilita conciencia de DPI por monitor para Windows/macOS
         sdl2.SDL_SetHint(sdl2.SDL_HINT_WINDOWS_DPI_AWARENESS, b"permonitorv2")
-        sdl2.SDL_SetHint(sdl2.SDL_HINT_VIDEO_HIGHDPI_DISABLED, b"0")
-        # Calidad de escalado: "best" = máximo filtrado anisotrópico GPU
-        sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_SCALE_QUALITY, b"best")
+        # Calidad de escalado: "1" = filtrado bilinear (buen equilibrio calidad/rendimiento)
+        sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_SCALE_QUALITY, b"1")
         
-        # 1. Detectar escala de DPI del sistema
-        temp_window = sdl2.SDL_CreateWindow(b"", 0, 0, 1, 1, sdl2.SDL_WINDOW_HIDDEN)
-        display_index = sdl2.SDL_GetWindowDisplayIndex(temp_window)
-        sdl2.SDL_DestroyWindow(temp_window)
-        
-        # Usar ctypes para obtener el DPI
-        dpi_scale_val = ctypes.c_float(1.0)
-        result = sdl2.SDL_GetDisplayDPI(display_index, None, ctypes.byref(dpi_scale_val), None)
-        
-        if result != 0:
-            print(f"[WARN] SDL_GetDisplayDPI falló, usando escala por defecto 2.0")
-            dpi_scale_val.value = 1.0
-        
-        # Factor de escala mínimo 2.0 para garantizar nitidez en Full HD+
-        self.render_scale = max(2.0, float(dpi_scale_val.value))
-        
-        # Calcular resolución interna de renderizado
-        render_ancho = int(ancho * self.render_scale)
-        render_alto = int(alto * self.render_scale)
-        
-        print(f"PyPhonOS: Escala DPI={self.render_scale:.2f}, Render interno={render_ancho}x{render_alto}")
-        
-        # 2. Crear ventana con soporte HiDPI
-        self.window = NativeWindow(render_ancho, render_alto, titulo)
+        # 1. Crear ventana con tamaño fijo de teléfono (escalado 2x en window.py)
+        self.window = NativeWindow(ancho, alto, titulo)
         self.canvas = Canvas(self.window)
-        
-        # 3. Configurar tamaño lógico (coordenadas de la app) vs tamaño real (píxeles físicos)
-        # Esto permite usar coordenadas 360x640 pero renderizar a 1080x1920 o más
-        sdl2.SDL_RenderSetLogicalSize(
-            self.window.renderer.renderer, 
-            ancho, 
-            alto
-        )
-        
-        # Forzar que el renderer use la resolución completa de la ventana
-        sdl2.SDL_RenderSetIntegerScale(self.window.renderer.renderer, sdl2.SDL_FALSE)
         
         self.widgets = []
         self.event_overlay = None
