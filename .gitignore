@@ -1,0 +1,1 @@
+Nothing should be ignored in this case, as the modified files ('core/app.py', 'core/window.py') are source code files and there are no build artifacts, dependencies, or temporary files in the changes.
