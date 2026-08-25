@@ -19,10 +19,15 @@ class NeumorphicPlayerScreen(Screen):
         self.is_playing = False
         self.current_time = 0
         self.total_time = 225  # 3:45 en segundos
+        # Llamar a build inmediatamente para crear los widgets
+        self.build()
         
     def build(self):
+        # Limpiar widgets existentes si los hay
+        self.widgets = []
+        
         # Fondo principal con color neumórfico base
-        bg_color = Color(224, 229, 236, 255)
+        self.bg_color = Color(224, 229, 236, 255)
         
         # Título
         title = Label(
@@ -31,7 +36,7 @@ class NeumorphicPlayerScreen(Screen):
             size=18,
             color=Color(51, 51, 51, 255)
         )
-        self.add(title)
+        self.add_widget(title)
         
         # Carátula del álbum (círculo neumórfico)
         cover = NeumorphicWidget(
@@ -40,7 +45,7 @@ class NeumorphicPlayerScreen(Screen):
             border_radius=100,
             elevation=1.5
         )
-        self.add(cover)
+        self.add_widget(cover)
         
         # Círculo interior para simular disco
         disc = NeumorphicWidget(
@@ -50,7 +55,7 @@ class NeumorphicPlayerScreen(Screen):
             elevation=0.8,
             background_color=Color(52, 152, 219, 255)
         )
-        self.add(disc)
+        self.add_widget(disc)
         
         # Información de la canción
         song_title = Label(
@@ -59,7 +64,7 @@ class NeumorphicPlayerScreen(Screen):
             size=16,
             color=Color(51, 51, 51, 255)
         )
-        self.add(song_title)
+        self.add_widget(song_title)
         
         artist = Label(
             text="Artista",
@@ -67,7 +72,7 @@ class NeumorphicPlayerScreen(Screen):
             size=14,
             color=Color(100, 100, 100, 255)
         )
-        self.add(artist)
+        self.add_widget(artist)
         
         # Barra de progreso (contenedor hundido)
         progress_bg = NeumorphicWidget(
@@ -77,7 +82,7 @@ class NeumorphicPlayerScreen(Screen):
             elevation=0.6,
             is_pressed=True
         )
-        self.add(progress_bg)
+        self.add_widget(progress_bg)
         
         # Barra de progreso actual
         self.progress_bar = NeumorphicWidget(
@@ -87,7 +92,7 @@ class NeumorphicPlayerScreen(Screen):
             background_color=Color(52, 152, 219, 255),
             elevation=0
         )
-        self.add(self.progress_bar)
+        self.add_widget(self.progress_bar)
         
         # Tiempo
         current_time_label = Label(
@@ -96,7 +101,7 @@ class NeumorphicPlayerScreen(Screen):
             size=11,
             color=Color(100, 100, 100, 255)
         )
-        self.add(current_time_label)
+        self.add_widget(current_time_label)
         
         total_time_label = Label(
             text="3:45",
@@ -104,7 +109,7 @@ class NeumorphicPlayerScreen(Screen):
             size=11,
             color=Color(100, 100, 100, 255)
         )
-        self.add(total_time_label)
+        self.add_widget(total_time_label)
         
         # Controles de reproducción
         # Botón anterior
@@ -115,7 +120,7 @@ class NeumorphicPlayerScreen(Screen):
             border_radius=30,
             elevation=1.2
         )
-        self.add(btn_prev)
+        self.add_widget(btn_prev)
         
         # Botón play/pause
         self.play_btn = NeumorphicButton(
@@ -126,7 +131,7 @@ class NeumorphicPlayerScreen(Screen):
             elevation=1.5,
             on_click=self.toggle_play
         )
-        self.add(self.play_btn)
+        self.add_widget(self.play_btn)
         
         # Botón siguiente
         btn_next = NeumorphicButton(
@@ -136,7 +141,7 @@ class NeumorphicPlayerScreen(Screen):
             border_radius=30,
             elevation=1.2
         )
-        self.add(btn_next)
+        self.add_widget(btn_next)
         
         # Control de volumen
         volume_label = Label(
@@ -145,7 +150,7 @@ class NeumorphicPlayerScreen(Screen):
             size=13,
             color=Color(80, 80, 80, 255)
         )
-        self.add(volume_label)
+        self.add_widget(volume_label)
         
         # Slider de volumen (simulado con widget neumórfico)
         volume_slider = NeumorphicWidget(
@@ -154,7 +159,7 @@ class NeumorphicPlayerScreen(Screen):
             border_radius=5,
             elevation=0.6
         )
-        self.add(volume_slider)
+        self.add_widget(volume_slider)
         
         # Indicador de volumen
         volume_indicator = NeumorphicWidget(
@@ -164,7 +169,7 @@ class NeumorphicPlayerScreen(Screen):
             background_color=Color(52, 152, 219, 255),
             elevation=0
         )
-        self.add(volume_indicator)
+        self.add_widget(volume_indicator)
     
     def toggle_play(self):
         """Cambia entre play y pause"""
