@@ -27,14 +27,20 @@ class MobileApp:
         sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_SCALE_QUALITY, b"best")
         
         # 1. Detectar escala de DPI del sistema
-        display_index = sdl2.SDL_GetWindowDisplayIndex(
-            sdl2.SDL_CreateWindow(b"", 0, 0, 1, 1, sdl2.SDL_WINDOW_HIDDEN)
-        )
-        dpi_scale = sdl2.c_float(1.0)
-        sdl2.SDL_GetDisplayDPI(display_index, None, ctypes.byref(dpi_scale), None)
+        temp_window = sdl2.SDL_CreateWindow(b"", 0, 0, 1, 1, sdl2.SDL_WINDOW_HIDDEN)
+        display_index = sdl2.SDL_GetWindowDisplayIndex(temp_window)
+        sdl2.SDL_DestroyWindow(temp_window)
+        
+        # Usar ctypes para obtener el DPI
+        dpi_scale_val = ctypes.c_float(1.0)
+        result = sdl2.SDL_GetDisplayDPI(display_index, None, ctypes.byref(dpi_scale_val), None)
+        
+        if result != 0:
+            print(f"[WARN] SDL_GetDisplayDPI falló, usando escala por defecto 2.0")
+            dpi_scale_val.value = 1.0
         
         # Factor de escala mínimo 2.0 para garantizar nitidez en Full HD+
-        self.render_scale = max(2.0, float(dpi_scale.value))
+        self.render_scale = max(2.0, float(dpi_scale_val.value))
         
         # Calcular resolución interna de renderizado
         render_ancho = int(ancho * self.render_scale)
