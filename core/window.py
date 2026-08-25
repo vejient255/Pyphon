@@ -6,32 +6,38 @@ import ctypes
 class NativeWindow:
     def __init__(self, ancho, alto, titulo):
         """
-        Inicializa una ventana con escalado de alta densidad forzado.
-        Optimizado para eliminar el aliasing (píxeles serruchados).
-        IMPORTANTE: Las hints de calidad ya se establecen en app.py ANTES de crear esta ventana.
+        Inicializa una ventana con tamaño fijo de teléfono pero renderizado HiDPI.
+        La ventana se muestra escalada (ej: 360x640 → 720x1280 en pantalla) pero
+        mantiene coordenadas lógicas de teléfono para compatibilidad.
         """
         # Inicializar los subsistemas de SDL2
         sdl2.ext.init()
         
-        self.ancho = ancho
-        self.alto = alto
+        self.ancho_logico = ancho  # Coordenadas lógicas (360x640)
+        self.alto_logico = alto
+        
+        # Factor de escala para ventana física (2x para que se vea bien en monitores modernos)
+        self.escala_ventana = 2.0
+        self.ancho = int(ancho * self.escala_ventana)
+        self.alto = int(alto * self.escala_ventana)
+        
         self.corriendo = True
         self.ultimo_clic = None 
         
-        # --- VENTANA CON SOPORTE HiDPI ---
-        # ALLOW_HIGHDPI es CRÍTICO: permite que la ventana use resolución nativa del monitor
-        flags = (
-            sdl2.SDL_WINDOW_SHOWN | 
-            sdl2.SDL_WINDOW_RESIZABLE | 
-            sdl2.SDL_WINDOW_ALLOW_HIGHDPI
-        )
+        # --- VENTANA CON TAMAÑO FIJO DE TELÉFONO ESCALADO ---
+        # Sin ALLOW_HIGHDPI aquí para controlar manualmente el tamaño
+        flags = sdl2.SDL_WINDOW_SHOWN | sdl2.SDL_WINDOW_RESIZABLE
         
         self.window = sdl2.ext.Window(
             titulo, 
-            size=(self.ancho, self.alto), 
+            size=(self.ancho, self.alto),  # Tamaño físico escalado (ej: 720x1280)
             flags=flags
         )
         self.window.show()
+        
+        # Forzar tamaño fijo (evitar que usuario redimensione)
+        sdl2.SDL_SetWindowMinimumSize(self.window.window, self.ancho, self.alto)
+        sdl2.SDL_SetWindowMaximumSize(self.window.window, self.ancho, self.alto)
         
         # --- RENDERER CON ACELERACIÓN GPU ---
         renderer_flags = (
@@ -45,8 +51,19 @@ class NativeWindow:
             flags=renderer_flags
         )
         
-        # NOTA: El tamaño lógico se establece en app.py después de detectar DPI
-        # No lo sobrescribimos aquí para evitar conflictos
+        # Configurar escala de renderizado: dibujar en resolución lógica pero mostrar escalado
+        # Esto mantiene la nitidez sin sobrecargar la GPU
+        sdl2.SDL_RenderSetScale(self.renderer.renderer, self.escala_ventana, self.escala_ventana)
+        
+        # Establecer tamaño lógico del renderer (coordenadas que usará la app)
+        sdl2.SDL_RenderSetLogicalSize(
+            self.renderer.renderer,
+            self.ancho_logico,
+            self.alto_logico
+        )
+        
+        # Calidad de escalado suave (bilinear filtering)
+        sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_SCALE_QUALITY, b"1")
         
         # Obtenemos el ID de la ventana
         self.window_id = sdl2.SDL_GetWindowID(self.window.window)

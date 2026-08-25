@@ -1,26 +1,54 @@
-```
-# Dependencies
-venv/
-.venv/
+```python
+# Python
 __pycache__/
 *.pyc
-.pytest_cache/
-.mypy_cache/
-
-# Environment
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.ENV
+.ENV.local
 .env
 .env.local
-*.env.*
+.env.*
+.venv.bak/
+.venv/
+.python-version
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage/
+htmlcov/
 
-# Logs and temp files
-*.log
-*.tmp
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Editors
+# IDE and editor
 .vscode/
 .idea/
+*.swp
+*.swo
+*.tmp
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
+
+# Compressed files
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.gz
+*.rar
+*.7z
 ```
